@@ -10,9 +10,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Eventplaner">
     
-    <!-- Verknüpfung zu Manifest und Icon im images-Ordner -->
+    <!-- Verknüpfung zum Bild direkt im Hauptverzeichnis -->
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="images/icon-512.png">
+    <link rel="apple-touch-icon" href="Gemini_Generated_Image_bu298gbu298gbu29.png">
 
     <style>
         :root {
@@ -120,22 +120,14 @@
 
     <script>
         function startePlanung() {
-            // Eine echte Interaktion statt nur einem Alert
             let name = prompt("Wie soll das Event heißen?");
             if (name) {
                 const list = document.getElementById('event-list');
                 const entry = document.createElement('p');
                 entry.textContent = "📅 " + name;
                 list.appendChild(entry);
-                
-                // Kurze Bestätigung
                 console.log("Event erstellt: " + name);
             }
-        }
-
-        // Service Worker Registrierung
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').catch(() => {});
         }
     </script>
 </body>
