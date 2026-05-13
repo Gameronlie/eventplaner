@@ -9,10 +9,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Eventplaner">
-    <link rel="apple-touch-icon" href="Gemini_Generated_Image_bu298gbu298gbu29.png">
     
-    <!-- Die Verknüpfung für den "Installieren"-Status -->
+    <!-- Verknüpfung zu Manifest und Icon im images-Ordner -->
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icon-512.png">
 
     <style>
         :root {
@@ -39,7 +39,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Modernes UI-Design ohne "Traktor-Look" */
         .app-container {
             background: var(--card-bg);
             padding: 40px;
@@ -65,11 +64,9 @@
             color: var(--text-dim);
             margin-bottom: 35px;
             font-size: 1.1rem;
-            font-weight: 400;
         }
 
-        /* Hochleistungs-Button für iPad (Sofort-Reaktion) */
-        .install-button {
+        .main-button {
             background-color: var(--button-blue);
             color: white;
             border: none;
@@ -79,16 +76,21 @@
             font-weight: 600;
             border-radius: 16px;
             cursor: pointer;
-            transition: transform 0.1s, background-color 0.2s;
-            box-shadow: 0 8px 20px rgba(31, 111, 235, 0.4);
-            
-            /* Verhindert Verzögerungen am iPad */
+            transition: transform 0.1s;
             touch-action: manipulation;
+            box-shadow: 0 8px 20px rgba(31, 111, 235, 0.4);
         }
 
-        .install-button:active {
+        .main-button:active {
             transform: scale(0.96);
-            background-color: #1158c7;
+        }
+
+        #event-list {
+            margin-top: 20px;
+            text-align: left;
+            max-height: 150px;
+            overflow-y: auto;
+            color: var(--accent-blue);
         }
 
         .branding {
@@ -105,28 +107,35 @@
 
     <div class="app-container">
         <h1>Eventplaner</h1>
-        <p class="subtitle">Personal Dashboard</p>
+        <p class="subtitle">Private Planungstool</p>
         
-        <!-- Button mit direkter Touch-Reaktion für schnelle Tablet-Bedienung -->
-        <button class="install-button" ontouchstart="" onclick="executeAction()">
-            Planung öffnen
+        <button class="main-button" ontouchstart="" onclick="startePlanung()">
+            Neues Event planen
         </button>
+
+        <div id="event-list"></div>
     </div>
 
-    <div class="branding">Secure PWA Environment | Gameronlie</div>
+    <div class="branding">Secure PWA | Gameronlie</div>
 
     <script>
-        function executeAction() {
-            // Bananen-Check: Hier startet deine private App-Logik
-            alert("Bananen-Check: App-Modus aktiviert!");
-            console.log("System gestartet.");
+        function startePlanung() {
+            // Eine echte Interaktion statt nur einem Alert
+            let name = prompt("Wie soll das Event heißen?");
+            if (name) {
+                const list = document.getElementById('event-list');
+                const entry = document.createElement('p');
+                entry.textContent = "📅 " + name;
+                list.appendChild(entry);
+                
+                // Kurze Bestätigung
+                console.log("Event erstellt: " + name);
+            }
         }
 
-        // Registriert den Dienst für Offline-Funktionen, falls nötig
+        // Service Worker Registrierung
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(() => {});
-            });
+            navigator.serviceWorker.register('sw.js').catch(() => {});
         }
     </script>
 </body>
