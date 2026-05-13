@@ -1,15 +1,15 @@
 {
-  "name": "Euer Startup Name",
-  "short_name": "Startup",
-  "start_url": "/index.html",
-  "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#ff0000",
+  "short_name": "Eventplaner",
+  "name": "Eventplaner Privat",
   "icons": [
     {
-      "src": "images/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "https://cdn-icons-png.flaticon.com/512/2907/2907150.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
-  ]
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0b0e14",
+  "background_color": "#0b0e14"
 }
