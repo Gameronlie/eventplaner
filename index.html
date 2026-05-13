@@ -2,84 +2,89 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dein Startup</title>
-    <!-- Verknüpfung zur Manifest-Datei -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#007bff">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eventplaner</title>
     
+    <!-- PWA & iPad Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="images/icon-512.png">
+
     <style>
+        /* Dunkelmodus mit Blau-Akzenten laut deinen Wünschen */
         body {
-            background-color: #121212; /* Dark Mode */
+            background-color: #0d1117; /* Dunkler Modus */
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
-        .container {
-            text-align: center;
-            padding: 20px;
+
+        h1 {
+            color: #58a6ff; /* Blau-Akzent */
+            margin-bottom: 20px;
         }
-        #installBtn {
-            display: none; /* Erstmal unsichtbar */
-            background-color: #007bff; /* Blaues Akzent */
+
+        /* Der Button, der sofort erscheinen soll */
+        .main-button {
+            background-color: #1f6feb; /* Kräftiges Blau */
             color: white;
             border: none;
             padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: bold;
+            border-radius: 12px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
-            transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(31, 111, 235, 0.3);
+            transition: transform 0.2s, background-color 0.2s;
+            /* Sicherstellen, dass er sofort da ist */
+            display: block !important; 
+            visibility: visible !important;
         }
-        #installBtn:active {
+
+        .main-button:active {
             transform: scale(0.95);
+            background-color: #1158c7;
+        }
+
+        /* Bananen-Deko für dich */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            font-size: 0.8rem;
+            color: #8b949e;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Willkommen im Portal</h1>
-        <p>Alles bereit für dein Event-Planning?</p>
-        
-        <!-- Der Install-Button -->
-        <button id="installBtn">App installieren</button>
-    </div>
+    <h1>Eventplaner</h1>
+    
+    <!-- Dein Button -->
+    <button class="main-button" onclick="startePlanung()">Event Planen</button>
+
+    <div class="footer">Gameronlie | PWA Version</div>
 
     <script>
-        // Service Worker Registrierung
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('service-worker.js')
-            .then(() => console.log("Service Worker registriert!"))
-            .catch(err => console.log("SW Fehler:", err));
+        // Funktion für den Button
+        function startePlanung() {
+            alert("Bananen-Check: Planung wird gestartet!");
         }
 
-        // Installations-Logik
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'block'; // Button zeigen
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.style.display = 'none';
-                }
-                deferredPrompt = null;
-            }
-        });
+        // Service Worker Registrierung für PWA (Offline-Nutzung)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('Service Worker bereit!', reg))
+                    .catch(err => console.log('Service Worker Fehler', err));
+            });
+        }
     </script>
 </body>
 </html>
