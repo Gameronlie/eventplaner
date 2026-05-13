@@ -6,15 +6,13 @@
     <title>Eventplaner</title>
     
     <!-- PWA & iPad Settings -->
-    <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="images/icon-512.png">
 
     <style>
-        /* Dunkelmodus mit Blau-Akzenten laut deinen Wünschen */
+        /* Dunkelmodus mit Blau-Akzenten */
         body {
-            background-color: #0d1117; /* Dunkler Modus */
+            background-color: #0d1117; 
             color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
@@ -24,28 +22,31 @@
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent; /* Entfernt graues Flackern auf iPad */
         }
 
         h1 {
-            color: #58a6ff; /* Blau-Akzent */
+            color: #58a6ff; 
             margin-bottom: 20px;
         }
 
-        /* Der Button, der sofort erscheinen soll */
+        /* Button-Design: Dunkelblau & Sofort klickbar */
         .main-button {
-            background-color: #1f6feb; /* Kräftiges Blau */
+            background-color: #1f6feb; 
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
+            padding: 20px 40px; /* Etwas größer für bessere Bedienung am Tablet */
+            font-size: 1.4rem;
             font-weight: bold;
-            border-radius: 12px;
+            border-radius: 15px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(31, 111, 235, 0.3);
-            transition: transform 0.2s, background-color 0.2s;
-            /* Sicherstellen, dass er sofort da ist */
-            display: block !important; 
-            visibility: visible !important;
+            box-shadow: 0 4px 15px rgba(31, 111, 235, 0.4);
+            transition: transform 0.1s;
+            
+            /* Verhindert Verzögerungen auf Touch-Geräten */
+            touch-action: manipulation;
+            display: block;
+            visibility: visible;
         }
 
         .main-button:active {
@@ -53,11 +54,10 @@
             background-color: #1158c7;
         }
 
-        /* Bananen-Deko für dich */
         .footer {
             position: absolute;
             bottom: 20px;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: #8b949e;
         }
     </style>
@@ -66,23 +66,22 @@
 
     <h1>Eventplaner</h1>
     
-    <!-- Dein Button -->
-    <button class="main-button" onclick="startePlanung()">Event Planen</button>
+    <!-- Der Button mit zusätzlichem Touch-Event für schnellere Reaktion -->
+    <button class="main-button" ontouchstart="" onclick="startePlanung()">Event Planen</button>
 
-    <div class="footer">Gameronlie | PWA Version</div>
+    <div class="footer">Privater Planer | Gameronlie</div>
 
     <script>
-        // Funktion für den Button
         function startePlanung() {
-            alert("Bananen-Check: Planung wird gestartet!");
+            // Bananen-Check: Hier passiert die Action
+            alert("Bananen-Check: Die Planung startet jetzt!");
+            console.log("Button wurde gedrückt.");
         }
 
-        // Service Worker Registrierung für PWA (Offline-Nutzung)
+        // Service Worker (Optional für Offline-Nutzung)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => console.log('Service Worker bereit!', reg))
-                    .catch(err => console.log('Service Worker Fehler', err));
+            navigator.serviceWorker.register('sw.js').catch(() => {
+                console.log("SW nicht gefunden, läuft normal weiter.");
             });
         }
     </script>
