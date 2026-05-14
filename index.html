@@ -5,66 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Projekt Portal</title>
     
+    <!-- Apple App-Modus Aktivierung -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="Gemini_Generated_Image_bu298gbu298gbu29.png">
 
     <style>
-        :root { --bg: #0b0e14; --card: #161b22; --blue: #1f6feb; --text: #f0f6fc; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .portal-card { background: var(--card); padding: 40px; border-radius: 20px; text-align: center; border: 1px solid #30363d; width: 80%; max-width: 400px; }
-        h1 { color: #58a6ff; }
-        .btn { background: var(--blue); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 10px; touch-action: manipulation; }
-        #installBtn { display: none; background: #238636; } /* Grün für Installation */
+        body { background: #0b0e14; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #161b22; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #30363d; }
+        .btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div class="portal-card">
+    <div class="card">
         <h1>Projekt Portal</h1>
-        <p>System bereit für Offline-Modus.</p>
-        
-        <!-- Button zum Installieren (wird nur angezeigt wenn möglich) -->
-        <button id="installBtn" class="btn">App Installieren</button>
-        
-        <!-- Button zum Starten der App -->
-        <button class="btn" onclick="openConfig()">App Konfigurieren</button>
+        <p>Status: Bereit zur Konfiguration</p>
+        <button class="btn" onclick="configApp()">App jetzt konfigurieren</button>
     </div>
 
     <script>
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-
-        // Erkennt, ob die App installiert werden kann (Chrome/Android/PC)
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'block';
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('App wurde installiert');
-                    installBtn.style.display = 'none';
-                }
-                deferredPrompt = null;
-            }
-        });
-
-        // Konfigurations-Logik
-        function openConfig() {
-            const mode = prompt("Konfiguration: (1) Event-Planer, (2) Autohaus Schnecke, (3) Music-Production");
-            if(mode == "1") alert("Modus: Event-Planer aktiv");
-            else if(mode == "2") alert("Modus: Autohaus Schnecke aktiv");
-            else if(mode == "3") alert("Modus: Music-Production aktiv");
-            else alert("Bananen-Check: Standard-Modus");
+        function configApp() {
+            // Hier konfigurierst du die App-Funktion
+            let choice = prompt("Was soll die App steuern? (1: Event, 2: Musik, 3: Auto)");
+            localStorage.setItem('app_mode', choice);
+            alert("System auf Modus " + choice + " eingestellt und offline gespeichert!");
         }
 
-        // Service Worker Registrierung (Pflicht für Offline!)
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
