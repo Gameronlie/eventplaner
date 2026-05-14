@@ -21,36 +21,43 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+      const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight - 100; // Platz für Buttons lassen
 
-        let drawing = false;
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
+let drawing = false;
+let mode = 'brush'; // 'brush' oder 'eraser'
 
-        // S-Pen / Touch Events
-        canvas.addEventListener('pointerdown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.pageX, e.pageY); });
-        canvas.addEventListener('pointermove', (e) => { if(drawing) { ctx.lineTo(e.pageX, e.pageY); ctx.stroke(); } });
-        canvas.addEventListener('pointerup', () => drawing = false);
+ctx.lineCap = 'round';
+ctx.lineWidth = 3;
 
-        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+canvas.addEventListener('pointerdown', (e) => {
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(e.clientX, e.clientY);
+});
 
-        function saveImage() {
-            const data = canvas.toDataURL('image/png');
-            localStorage.setItem('ev_sketch', data); // Speichert die Skizze als Text-Code lokal
-            alert("Skizze lokal auf dem Gerät gesichert!");
-        }
+canvas.addEventListener('pointermove', (e) => {
+    if (!drawing) return;
+    ctx.strokeStyle = (mode === 'eraser') ? '#ffffff' : '#000000';
+    ctx.lineWidth = (mode === 'eraser') ? 20 : 3; // Radierer ist dicker
+    ctx.lineTo(e.clientX, e.clientY);
+    ctx.stroke();
+});
 
-        // Lade letzte Skizze falls vorhanden
-        const saved = localStorage.getItem('ev_sketch');
-        if(saved) {
-            const img = new Image();
-            img.src = saved;
-            img.onload = () => ctx.drawImage(img, 0, 0);
-        }
+canvas.addEventListener('pointerup', () => drawing = false);
+
+function setMode(newMode) {
+    mode = newMode;
+    // Visuelles Feedback welcher Button aktiv ist
+    document.getElementById('btn-brush').style.opacity = (mode === 'brush') ? '1' : '0.5';
+    document.getElementById('btn-eraser').style.opacity = (mode === 'eraser') ? '1' : '0.5';
+}
+
+function clearCanvas() { 
+    if(confirm("Alles löschen?")) ctx.clearRect(0, 0, canvas.width, canvas.height); 
+}
     </script>
 </body>
 </html>
