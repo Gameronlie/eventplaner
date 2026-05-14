@@ -5,33 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Termine</title>
     <style>
-        body { background: #0b0e14; color: white; font-family: sans-serif; padding: 20px; }
-        .event-card { background: #161b22; border-left: 4px solid #58a6ff; padding: 15px; margin-bottom: 10px; border-radius: 0 10px 10px 0; }
-        input { background: #161b22; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; margin-bottom: 5px; width: 100%; box-sizing: border-box; }
+        :root { --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; }
+        body { background: var(--bg); color: white; font-family: sans-serif; padding: 20px; margin: 0; }
+        .event-card { 
+            background: var(--card); border-left: 4px solid var(--blue); 
+            padding: 15px; margin-bottom: 10px; border-radius: 0 10px 10px 0; 
+            display: flex; justify-content: space-between; align-items: center;
+            border-top: 1px solid #30363d; border-right: 1px solid #30363d; border-bottom: 1px solid #30363d;
+        }
+        .input-area { margin-top:20px; padding:15px; background:var(--card); border-radius:15px; border: 1px solid #30363d; }
+        input { background: #0b0e14; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box; }
+        .save-btn { width:100%; padding:12px; background:#1f6feb; color:white; border:none; border-radius:8px; font-weight: bold; }
+        .del-btn { background: none; border: none; color: #f85149; cursor: pointer; font-size: 1.2rem; }
     </style>
 </head>
 <body>
-    <a href="event.html" style="color: #58a6ff; text-decoration: none;">← Dashboard</a>
-    <h2>Termine</h2>
+    <a href="event.html" style="color: var(--blue); text-decoration: none;">← Dashboard</a>
+    <h2>📅 Termine</h2>
     
     <div id="calendar-list"></div>
 
-    <div style="margin-top:20px; padding:15px; background:#161b22; border-radius:15px;">
-        <input type="text" id="eventTitle" placeholder="Was steht an?">
+    <div class="input-area">
+        <input type="text" id="eventTitle" placeholder="Was steht an? (z.B. Release-Tag)">
         <input type="date" id="eventDate">
-        <button onclick="addEvent()" style="width:100%; padding:10px; background:#1f6feb; color:white; border:none; border-radius:8px;">Termin speichern</button>
+        <button class="save-btn" onclick="addEvent()">Termin speichern</button>
     </div>
 
     <script>
+        // Daten laden
         let events = JSON.parse(localStorage.getItem('ev_dates')) || [];
 
         function render() {
             const list = document.getElementById('calendar-list');
-            list.innerHTML = events.sort((a,b) => new Date(a.date) - new Date(b.date)).map(e => `
+            if (events.length === 0) {
+                list.innerHTML = "<p style='color: #8b949e;'>Keine Termine geplant.</p>";
+                return;
+            }
+
+            // Sortieren nach Datum
+            list.innerHTML = events.sort((a,b) => new Date(a.date) - new Date(b.date)).map((e, index) => `
                 <div class="event-card">
-                    <strong style="color:#58a6ff">${e.date}</strong><br>${e.title}
+                    <div>
+                        <strong style="color:var(--blue)">${formatDate(e.date)}</strong><br>
+                        <span>${e.title}</span>
+                    </div>
+                    <button class="del-btn" onclick="deleteEvent(${index})">🗑️</button>
                 </div>
             `).join('');
+        }
+
+        function formatDate(dateStr) {
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('de-DE', options);
         }
 
         function addEvent() {
@@ -39,10 +64,25 @@
             const date = document.getElementById('eventDate').value;
             if(title && date) {
                 events.push({ title, date });
-                localStorage.setItem('ev_dates', JSON.stringify(events));
+                save();
+                document.getElementById('eventTitle').value = "";
+                document.getElementById('eventDate').value = "";
                 render();
             }
         }
+
+        function deleteEvent(index) {
+            if(confirm("Termin wirklich löschen?")) {
+                events.splice(index, 1);
+                save();
+                render();
+            }
+        }
+
+        function save() {
+            localStorage.setItem('ev_dates', JSON.stringify(events));
+        }
+
         render();
     </script>
 </body>
