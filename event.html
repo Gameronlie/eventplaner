@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Event Planer</title>
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --card: #161b22;
+            --blue: #58a6ff;
+            --text: #f0f6fc;
+        }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+        }
+        header {
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .event-card {
+            background: var(--card);
+            border: 1px solid #30363d;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        .status-badge {
+            background: #238636;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1f6feb;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2 style="margin:0; color: var(--blue);">Meine Events</h2>
+        <span class="status-badge">Offline</span>
+    </header>
+
+    <div class="event-card">
+        <h3 style="margin-top:0;">Neues Event Projekt</h3>
+        <p style="color: #8b949e; margin-bottom: 0;">Geplante Aufgaben: 0</p>
+    </div>
+
+    <button class="add-btn" onclick="alert('Neues Event erstellen...')">+</button>
+
+</body>
+</html>
