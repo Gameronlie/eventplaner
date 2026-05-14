@@ -2,34 +2,56 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projekt Portal</title>
-    
-    <!-- Apple App-Modus Aktivierung -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="Gemini_Generated_Image_bu298gbu298gbu29.png">
+    <meta name="theme-color" content="#0b0e14">
 
     <style>
-        body { background: #0b0e14; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #161b22; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #30363d; }
-        .btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; }
+        body { background: #0b0e14; color: #58a6ff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: #161b22; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #30363d; width: 320px; }
+        .btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        #install-area { display: none; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #30363d; }
     </style>
 </head>
 <body>
     <div class="card">
+        <div id="install-area">
+            <p style="color: #fff;">App verfügbar!</p>
+            <button class="btn" id="download-button" style="background: #238636;">APP HERUNTERLADEN</button>
+        </div>
+        
         <h1>Projekt Portal</h1>
-        <p>Status: Bereit zur Konfiguration</p>
-        <button class="btn" onclick="configApp()">App jetzt konfigurieren</button>
+        <button class="btn" onclick="konfig()">Konfigurieren</button>
     </div>
 
     <script>
-        function configApp() {
-            // Hier konfigurierst du die App-Funktion
-            let choice = prompt("Was soll die App steuern? (1: Event, 2: Musik, 3: Auto)");
-            localStorage.setItem('app_mode', choice);
-            alert("System auf Modus " + choice + " eingestellt und offline gespeichert!");
+        let deferredPrompt;
+        const installArea = document.getElementById('install-area');
+        const downloadBtn = document.getElementById('download-button');
+
+        // Android/Chrome erkennt die App und bereitet den Download vor
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installArea.style.display = 'block';
+        });
+
+        downloadBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installArea.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        function konfig() {
+            let mode = prompt("Modus wählen: 1 (Event), 2 (Auto), 3 (Musik)");
+            localStorage.setItem('portal_mode', mode);
+            alert("Modus " + mode + " gespeichert!");
         }
 
         if ('serviceWorker' in navigator) {
