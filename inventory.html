@@ -7,88 +7,80 @@
     <style>
         :root { --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; --green: #238636; --red: #f85149; }
         body { background: var(--bg); color: #f0f6fc; font-family: sans-serif; padding: 20px; margin: 0; }
-        .row { 
-            background: var(--card); padding: 15px; border-radius: 12px; 
-            margin-bottom: 12px; border: 1px solid #30363d;
-        }
+        .row { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #30363d; position: relative; }
         .top-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .time-info { font-size: 0.85rem; color: #8b949e; margin-top: 8px; padding-top: 8px; border-top: 1px solid #30363d; }
-        
-        input, select { 
-            background: #0b0e14; border: 1px solid #30363d; color: white; 
-            padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 5px;
-        }
-        .status-badge { 
-            padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; 
-            font-weight: bold; cursor: pointer; border: none;
-        }
+        input, select { background: #0b0e14; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 5px; width: 100%; box-sizing: border-box; }
+        .btn-add { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .status-badge { padding: 8px 15px; border-radius: 20px; font-weight: bold; border: none; cursor: pointer; }
         .status-on { background: var(--green); color: white; }
         .status-off { background: var(--red); color: white; }
-        
-        .add-box { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--blue); margin-top: 20px; }
-        .btn-add { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; margin-top: 10px; }
+        .time-info { font-size: 0.85rem; color: #8b949e; margin-top: 8px; border-top: 1px solid #30363d; padding-top: 8px; }
     </style>
 </head>
 <body>
     <a href="event.html" style="color: var(--blue); text-decoration: none;">← Dashboard</a>
     <h2>📦 Inventar & Buchung</h2>
     
+    <!-- Hier wird die Liste angezeigt -->
     <div id="inventory-list"></div>
 
-    <div class="add-box">
-        <h3>Neuer Eintrag</h3>
-        <input type="text" id="name" placeholder="Gegenstand" style="width: 100%;">
+    <!-- Eingabeformular -->
+    <div style="background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--blue); margin-top: 20px;">
+        <h3>Neu hinzufügen</h3>
+        <input type="text" id="name" placeholder="Gegenstand Name">
         <div style="display: flex; gap: 5px;">
-            <input type="number" id="amount" placeholder="Anzahl" style="width: 30%;" value="1">
+            <input type="number" id="amount" placeholder="Anz." style="width: 30%;" value="1">
             <select id="status" style="width: 70%;">
                 <option value="true">Verfügbar</option>
-                <option value="false">Gebucht / Weg</option>
+                <option value="false">Belegt</option>
             </select>
         </div>
-        <p style="margin: 10px 0 5px 0; font-size: 0.8rem; color: var(--blue);">Zeitraum (optional):</p>
-        <div style="display: flex; gap: 5px;">
-            <input type="date" id="start" style="width: 50%;">
-            <input type="date" id="end" style="width: 50%;">
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+            <input type="date" id="start">
+            <input type="date" id="end">
         </div>
-        <button class="btn-add" onclick="addItem()">In Liste speichern</button>
+        <button class="btn-add" onclick="addItem()">SPEICHERN</button>
     </div>
 
     <script>
-        let inventory = JSON.parse(localStorage.getItem('ev_inventory_pro')) || [];
+        // Start-Funktion
+        let inventory = [];
+
+        function loadData() {
+            const saved = localStorage.getItem('ev_inventory_pro');
+            inventory = saved ? JSON.parse(saved) : [];
+            render();
+        }
 
         function render() {
             const container = document.getElementById('inventory-list');
-            container.innerHTML = inventory.length === 0 ? "<p style='color: #8b949e;'>Keine Buchungen vorhanden.</p>" : "";
+            container.innerHTML = ""; // Liste leeren
+
+            if (inventory.length === 0) {
+                container.innerHTML = "<p style='color: #8b949e;'>Keine Einträge vorhanden.</p>";
+                return;
+            }
 
             inventory.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'row';
                 
-                // Zeitraum-Anzeige formatieren
-                let timeText = (item.start && item.end) 
-                    ? `📅 ${formatDate(item.start)} bis ${formatDate(item.end)}` 
-                    : "Kein fester Zeitraum gebucht";
+                let timeRange = (item.start && item.end) 
+                    ? `📅 ${new Date(item.start).toLocaleDateString('de-DE')} - ${new Date(item.end).toLocaleDateString('de-DE')}`
+                    : "Kein Zeitraum";
 
                 div.innerHTML = `
                     <div class="top-line">
-                        <strong style="font-size: 1.1rem;">${item.name} (${item.amount}x)</strong>
-                        <button onclick="removeItem(${index})" style="background:none; border:none; color:var(--red); font-size: 1.2rem;">🗑️</button>
+                        <strong>${item.name} (${item.amount}x)</strong>
+                        <button onclick="removeItem(${index})" style="background:none; border:none; color:var(--red); font-size: 1.5rem;">🗑️</button>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <button class="status-badge ${item.available ? 'status-on' : 'status-off'}" 
-                                onclick="toggleStatus(${index})">
-                            ${item.available ? 'FREI' : 'GEBUCHT'}
-                        </button>
-                    </div>
-                    <div class="time-info">${timeText}</div>
+                    <button class="status-badge ${item.available ? 'status-on' : 'status-off'}" onclick="toggleStatus(${index})">
+                        ${item.available ? 'FREI' : 'GEBUCHT'}
+                    </button>
+                    <div class="time-info">${timeRange}</div>
                 `;
                 container.appendChild(div);
             });
-        }
-
-        function formatDate(d) {
-            if(!d) return "";
-            return new Date(d).toLocaleDateString('de-DE');
         }
 
         function addItem() {
@@ -98,36 +90,37 @@
             const start = document.getElementById('start').value;
             const end = document.getElementById('end').value;
 
-            if (name) {
+            if (name.trim() !== "") {
                 inventory.push({ name, amount, available, start, end });
-                save();
-                // Reset Felder
+                saveAndRefresh();
+                // Felder leeren
                 document.getElementById('name').value = "";
                 document.getElementById('start').value = "";
                 document.getElementById('end').value = "";
-                render();
+            } else {
+                alert("Bitte einen Namen eingeben!");
             }
         }
 
         function toggleStatus(index) {
             inventory[index].available = !inventory[index].available;
-            save();
-            render();
+            saveAndRefresh();
         }
 
         function removeItem(index) {
-            if(confirm("Löschen?")) {
+            if(confirm("Diesen Eintrag löschen?")) {
                 inventory.splice(index, 1);
-                save();
-                render();
+                saveAndRefresh();
             }
         }
 
-        function save() {
+        function saveAndRefresh() {
             localStorage.setItem('ev_inventory_pro', JSON.stringify(inventory));
+            render(); // Zwingt die Seite zur Aktualisierung
         }
 
-        render();
+        // Beim Start laden
+        loadData();
     </script>
 </body>
 </html>
