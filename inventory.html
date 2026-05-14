@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventar</title>
+    <style>
+        body { background: #0b0e14; color: #f0f6fc; font-family: sans-serif; padding: 20px; }
+        .item-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        input { background: #161b22; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; flex: 1; }
+        .add-btn { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <a href="event.html" style="color: #58a6ff; text-decoration: none;">← Dashboard</a>
+    <h2>Inventar / Equipment</h2>
+    <div id="list"></div>
+    <div class="item-row">
+        <input type="text" id="newItem" placeholder="Gegenstand...">
+        <button class="add-btn" onclick="addItem()">+</button>
+    </div>
+
+    <script>
+        let items = JSON.parse(localStorage.getItem('ev_inv')) || [];
+        const render = () => {
+            document.getElementById('list').innerHTML = items.map((it, i) => 
+                `<div class="item-row"><input value="${it}" readonly><button onclick="del(${i})" style="background:none; border:none; color:#f85149;">🗑️</button></div>`
+            ).join('');
+        };
+        function addItem() {
+            const val = document.getElementById('newItem').value;
+            if(val) { items.push(val); localStorage.setItem('ev_inv', JSON.stringify(items)); render(); document.getElementById('newItem').value = ""; }
+        }
+        function del(i) { items.splice(i, 1); localStorage.setItem('ev_inv', JSON.stringify(items)); render(); }
+        render();
+    </script>
+</body>
+</html>
