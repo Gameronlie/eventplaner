@@ -3,38 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Event Planer</title>
+    <title>Event Planer</title>
     <style>
-        body { background: #0b0e14; color: #58a6ff; font-family: sans-serif; padding: 20px; }
-        .input-group { background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; }
-        textarea { width: 100%; background: #0b0e14; color: white; border: 1px solid #30363d; padding: 10px; border-radius: 8px; box-sizing: border-box; }
-        .save-btn { background: #1f6feb; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; margin-top: 10px; font-weight: bold; }
-        #status { color: #8b949e; font-size: 0.8rem; margin-top: 5px; }
+        body { background: #0b0e14; color: #f0f6fc; font-family: sans-serif; padding: 20px; }
+        textarea { width: 100%; background: #161b22; color: #58a6ff; border: 1px solid #30363d; padding: 15px; border-radius: 10px; box-sizing: border-box; }
+        .save-btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; margin-top: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <a href="index.html" style="color: #8b949e; text-decoration: none;">← Zurück</a>
-    <h2>Event Daten</h2>
-    
-    <div class="input-group">
-        <p>Deine Notizen (werden lokal gespeichert):</p>
-        <textarea id="eventData" rows="5" placeholder="Schreib hier etwas..."></textarea>
-        <button class="save-btn" onclick="saveData()">DATEN LOKAL SPEICHERN</button>
-        <div id="status"></div>
-    </div>
+    <h2>Event Notizen</h2>
+    <textarea id="data" rows="10" placeholder="Hier planen..."></textarea>
+    <button class="save-btn" onclick="save()">AUF HANDY SPEICHERN</button>
+    <p id="out" style="color: #8b949e; font-size: 0.8rem;"></p>
 
     <script>
-        // Daten beim Laden abrufen
-        window.onload = () => {
-            const saved = localStorage.getItem('my_event_data');
-            if (saved) document.getElementById('eventData').value = saved;
-        };
+        // Lädt Daten vom Samsung Speicher
+        document.getElementById('data').value = localStorage.getItem('ev_data') || "";
 
-        // Daten lokal auf dem Gerät speichern
-        function saveData() {
-            const data = document.getElementById('eventData').value;
-            localStorage.setItem('my_event_data', data);
-            document.getElementById('status').innerText = "Gespeichert am " + new Date().toLocaleTimeString();
+        function save() {
+            const val = document.getElementById('data').value;
+            localStorage.setItem('ev_data', val); // Kostet 0€ Bandbreite
+            document.getElementById('out').innerText = "Gespeichert!";
         }
     </script>
 </body>
