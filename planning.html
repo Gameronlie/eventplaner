@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Termine</title>
+    <style>
+        body { background: #0b0e14; color: white; font-family: sans-serif; padding: 20px; }
+        .event-card { background: #161b22; border-left: 4px solid #58a6ff; padding: 15px; margin-bottom: 10px; border-radius: 0 10px 10px 0; }
+        input { background: #161b22; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; margin-bottom: 5px; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <a href="event.html" style="color: #58a6ff; text-decoration: none;">← Dashboard</a>
+    <h2>Termine</h2>
+    
+    <div id="calendar-list"></div>
+
+    <div style="margin-top:20px; padding:15px; background:#161b22; border-radius:15px;">
+        <input type="text" id="eventTitle" placeholder="Was steht an?">
+        <input type="date" id="eventDate">
+        <button onclick="addEvent()" style="width:100%; padding:10px; background:#1f6feb; color:white; border:none; border-radius:8px;">Termin speichern</button>
+    </div>
+
+    <script>
+        let events = JSON.parse(localStorage.getItem('ev_dates')) || [];
+
+        function render() {
+            const list = document.getElementById('calendar-list');
+            list.innerHTML = events.sort((a,b) => new Date(a.date) - new Date(b.date)).map(e => `
+                <div class="event-card">
+                    <strong style="color:#58a6ff">${e.date}</strong><br>${e.title}
+                </div>
+            `).join('');
+        }
+
+        function addEvent() {
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            if(title && date) {
+                events.push({ title, date });
+                localStorage.setItem('ev_dates', JSON.stringify(events));
+                render();
+            }
+        }
+        render();
+    </script>
+</body>
+</html>
