@@ -3,41 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Portal Setup</title>
+    <title>Event Setup</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        :root { --bg: #0b0e14; --card: #161b22; --blue: #1f6feb; --green: #238636; }
-        body { background: var(--bg); color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: var(--card); padding: 30px; border-radius: 20px; text-align: center; border: 1px solid #30363d; width: 300px; }
-        .btn { border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; display: block; text-decoration: none; color: white; }
-        #install-btn { background: var(--green); display: none; }
+        body { background: #0b0e14; color: white; font-family: sans-serif; text-align: center; padding: 50px 20px; }
+        .btn { background: #238636; color: white; border: none; padding: 20px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
+        .link { display: block; margin-top: 20px; color: #58a6ff; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Event Portal</h1>
-        <button id="install-btn" class="btn">APP INSTALLIEREN</button>
-        <a href="event.html" class="btn" style="background: var(--blue);">ZUM PORTAL</a>
-    </div>
+    <h1>Event Portal</h1>
+    <button id="install" class="btn" style="display:none;">APP INSTALLIEREN</button>
+    <a href="event.html" class="link">Direkt zum Planer →</a>
 
     <script>
-        let deferredPrompt;
+        let promptEvt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('install-btn').style.display = 'block';
+            promptEvt = e;
+            document.getElementById('install').style.display = 'block';
         });
-
-        document.getElementById('install-btn').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt = null;
-            }
+        document.getElementById('install').addEventListener('click', () => {
+            if(promptEvt) promptEvt.prompt();
         });
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
+        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
     </script>
 </body>
 </html>
