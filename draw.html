@@ -3,61 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>S-Pen Skizze</title>
+    <title>S-Pen Pro Studio</title>
     <style>
-        body { background: #0b0e14; margin: 0; overflow: hidden; font-family: sans-serif; }
-        canvas { background: #fff; touch-action: none; display: block; }
-        .controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(22, 27, 34, 0.9); padding: 15px; border-radius: 20px; border: 1px solid #30363d; }
-        .btn { padding: 10px; border-radius: 10px; border: none; background: #1f6feb; color: white; font-weight: bold; }
+        :root { --bg: #0b0e14; --blue: #58a6ff; --card: #161b22; }
+        body { background: var(--bg); margin: 0; overflow: hidden; font-family: sans-serif; color: white; }
+        
+        /* Das Canvas ist jetzt weiß für bessere Sichtbarkeit der Skizzen */
+        canvas { background: #ffffff; touch-action: none; display: block; cursor: crosshair; }
+
+        .toolbar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: var(--card); padding: 15px; display: flex; 
+            gap: 10px; justify-content: center; align-items: center;
+            border-top: 1px solid #30363d; box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .btn { 
+            padding: 10px 15px; border-radius: 8px; border: 1px solid #30363d; 
+            background: #21262d; color: white; font-weight: bold; font-size: 0.9rem;
+        }
+        .active { border-color: var(--blue); background: #1f6feb; }
+        
+        .gallery-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: none; z-index: 20; padding: 20px;
+            box-sizing: border-box; overflow-y: auto;
+        }
     </style>
 </head>
 <body>
+
     <canvas id="canvas"></canvas>
-    
-    <div class="controls">
-        <button class="btn" onclick="location.href='event.html'">Zurück</button>
-        <button class="btn" style="background:#f85149" onclick="clearCanvas()">Löschen</button>
-        <button class="btn" style="background:#238636" onclick="saveImage()">Speichern</button>
+
+    <div class="toolbar">
+        <button class="btn" onclick="location.href='event.html'">←</button>
+        <button id="btn-pen" class="btn active" onclick="setMode('pen')">🖊️ Stift</button>
+        <button id="btn-eraser" class="btn" onclick="setMode('eraser')">🧽 Radierer</button>
+        <button class="btn" onclick="saveNewDrawing()" style="background: #238636;">💾 Neu Speichern</button>
+        <button class="btn" onclick="toggleGallery()">🖼️ Galerie</button>
+        <button class="btn" onclick="clearCanvas()" style="color: #f85149;">🗑️</button>
+    </div>
+
+    <!-- Galerie Ansicht -->
+    <div id="gallery" class="gallery-overlay">
+        <h2>Deine Skizzen</h2>
+        <div id="gallery-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+        <button class="btn" onclick="toggleGallery()" style="margin-top: 20px; width: 100%;">Schließen</button>
     </div>
 
     <script>
-      const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight - 100; // Platz für Buttons lassen
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight - 80;
 
-let drawing = false;
-let mode = 'brush'; // 'brush' oder 'eraser'
+        let drawing = false;
+        let mode = 'pen';
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-ctx.lineCap = 'round';
-ctx.lineWidth = 3;
+        // NUR S-PEN: Wir filtern nach 'pen' (S-Pen) und ignorieren 'touch' (Finger)
+        canvas.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'pen') { 
+                drawing = true;
+                ctx.beginPath();
+                ctx.moveTo(e.clientX, e.clientY);
+            }
+        });
 
-canvas.addEventListener('pointerdown', (e) => {
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(e.clientX, e.clientY);
-});
+        canvas.addEventListener('pointermove', (e) => {
+            if (drawing && e.pointerType === 'pen') {
+                ctx.lineWidth = (mode === 'eraser') ? 30 : 2;
+                ctx.strokeStyle = (mode === 'eraser') ? '#ffffff' : '#000000';
+                ctx.lineTo(e.clientX, e.clientY);
+                ctx.stroke();
+            }
+        });
 
-canvas.addEventListener('pointermove', (e) => {
-    if (!drawing) return;
-    ctx.strokeStyle = (mode === 'eraser') ? '#ffffff' : '#000000';
-    ctx.lineWidth = (mode === 'eraser') ? 20 : 3; // Radierer ist dicker
-    ctx.lineTo(e.clientX, e.clientY);
-    ctx.stroke();
-});
+        canvas.addEventListener('pointerup', () => drawing = false);
 
-canvas.addEventListener('pointerup', () => drawing = false);
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('btn-pen').classList.toggle('active', mode === 'pen');
+            document.getElementById('btn-eraser').classList.toggle('active', mode === 'eraser');
+        }
 
-function setMode(newMode) {
-    mode = newMode;
-    // Visuelles Feedback welcher Button aktiv ist
-    document.getElementById('btn-brush').style.opacity = (mode === 'brush') ? '1' : '0.5';
-    document.getElementById('btn-eraser').style.opacity = (mode === 'eraser') ? '1' : '0.5';
-}
+        function clearCanvas() {
+            if(confirm("Leinwand leeren?")) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
 
-function clearCanvas() { 
-    if(confirm("Alles löschen?")) ctx.clearRect(0, 0, canvas.width, canvas.height); 
-}
+        // Mehrere Zeichnungen verwalten
+        function saveNewDrawing() {
+            const data = canvas.toDataURL('image/png');
+            let gallery = JSON.parse(localStorage.getItem('ev_gallery')) || [];
+            gallery.push({ id: Date.now(), img: data });
+            localStorage.setItem('ev_gallery', JSON.stringify(gallery));
+            alert("In Galerie gespeichert!");
+        }
+
+        function toggleGallery() {
+            const g = document.getElementById('gallery');
+            if (g.style.display === 'block') {
+                g.style.display = 'none';
+            } else {
+                g.style.display = 'block';
+                renderGallery();
+            }
+        }
+
+        function renderGallery() {
+            const list = document.getElementById('gallery-list');
+            const gallery = JSON.parse(localStorage.getItem('ev_gallery')) || [];
+            list.innerHTML = gallery.map((item, index) => `
+                <div style="background: white; padding: 5px; border-radius: 5px;">
+                    <img src="${item.img}" style="width: 100%;" onclick="loadImg('${item.img}')">
+                    <button onclick="deleteImg(${index})" style="width: 100%; color: red; border: none; background: none;">Löschen</button>
+                </div>
+            `).join('');
+        }
+
+        function loadImg(data) {
+            const img = new Image();
+            img.src = data;
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                toggleGallery();
+            };
+        }
+
+        function deleteImg(index) {
+            let gallery = JSON.parse(localStorage.getItem('ev_gallery')) || [];
+            gallery.splice(index, 1);
+            localStorage.setItem('ev_gallery', JSON.stringify(gallery));
+            renderGallery();
+        }
     </script>
 </body>
 </html>
