@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>S-Pen Skizze</title>
+    <style>
+        body { background: #0b0e14; margin: 0; overflow: hidden; font-family: sans-serif; }
+        canvas { background: #fff; touch-action: none; display: block; }
+        .controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; background: rgba(22, 27, 34, 0.9); padding: 15px; border-radius: 20px; border: 1px solid #30363d; }
+        .btn { padding: 10px; border-radius: 10px; border: none; background: #1f6feb; color: white; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="controls">
+        <button class="btn" onclick="location.href='event.html'">Zurück</button>
+        <button class="btn" style="background:#f85149" onclick="clearCanvas()">Löschen</button>
+        <button class="btn" style="background:#238636" onclick="saveImage()">Speichern</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let drawing = false;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+
+        // S-Pen / Touch Events
+        canvas.addEventListener('pointerdown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.pageX, e.pageY); });
+        canvas.addEventListener('pointermove', (e) => { if(drawing) { ctx.lineTo(e.pageX, e.pageY); ctx.stroke(); } });
+        canvas.addEventListener('pointerup', () => drawing = false);
+
+        function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+        function saveImage() {
+            const data = canvas.toDataURL('image/png');
+            localStorage.setItem('ev_sketch', data); // Speichert die Skizze als Text-Code lokal
+            alert("Skizze lokal auf dem Gerät gesichert!");
+        }
+
+        // Lade letzte Skizze falls vorhanden
+        const saved = localStorage.getItem('ev_sketch');
+        if(saved) {
+            const img = new Image();
+            img.src = saved;
+            img.onload = () => ctx.drawImage(img, 0, 0);
+        }
+    </script>
+</body>
+</html>
