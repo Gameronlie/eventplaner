@@ -3,108 +3,186 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Inventar Buchung</title>
+    <title>Inventar & Buchung</title>
     <style>
-        :root { --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; --green: #238636; --red: #f85149; }
-        body { background: var(--bg); color: #f0f6fc; font-family: sans-serif; padding: 20px; margin: 0; }
-        .row { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #30363d; }
+        :root { 
+            --bg: #0b0e14; 
+            --card: #161b22; 
+            --blue: #58a6ff; 
+            --green: #238636; 
+            --red: #f85149; 
+            --text: #f0f6fc; 
+        }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', sans-serif; 
+            padding: 20px; 
+            margin: 0; 
+        }
+        .nav-back { color: var(--blue); text-decoration: none; display: inline-block; margin-bottom: 20px; }
         
-        .status-btn { 
-            padding: 8px 15px; border-radius: 6px; border: none; font-weight: bold; color: white; margin-top: 10px;
+        /* Eingabebereich */
+        .add-container { 
+            background: var(--card); 
+            padding: 20px; 
+            border-radius: 15px; 
+            border: 1px solid var(--blue); 
+            margin-bottom: 30px; 
+        }
+        input { 
+            background: #0b0e14; 
+            border: 1px solid #30363d; 
+            color: white; 
+            padding: 12px; 
+            border-radius: 8px; 
+            width: 100%; 
+            box-sizing: border-box; 
+            margin-bottom: 10px; 
+            font-size: 1rem;
+        }
+        .btn-add { 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 8px; 
+            width: 100%; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
+
+        /* Liste */
+        .item-card { 
+            background: var(--card); 
+            padding: 15px; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            border: 1px solid #30363d; 
+        }
+        .item-header { display: flex; justify-content: space-between; align-items: center; }
+        
+        .status-indicator { 
+            display: inline-block; 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            margin-top: 10px; 
         }
         .frei { background: var(--green); }
         .belegt { background: var(--red); }
 
-        .booking-area { 
-            margin-top: 10px; padding-top: 10px; border-top: 1px solid #30363d; display: none; 
+        .booking-form { 
+            margin-top: 15px; 
+            padding-top: 15px; 
+            border-top: 1px solid #30363d; 
         }
-        
-        input { 
-            background: #0b0e14; border: 1px solid #30363d; color: white; 
-            padding: 10px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 5px;
+        .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-save-date { 
+            background: var(--green); 
+            color: white; 
+            border: none; 
+            padding: 8px; 
+            border-radius: 6px; 
+            margin-top: 10px; 
+            width: 100%; 
+            font-size: 0.9rem;
         }
-        .btn-main { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+        .time-display { font-size: 0.85rem; color: #8b949e; margin-top: 8px; }
     </style>
 </head>
 <body>
-    <a href="event.html" style="color: var(--blue); text-decoration: none;">← Dashboard</a>
-    <h2>📦 Inventar</h2>
-    
-    <div id="inventory-list"></div>
 
-    <div style="background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--blue); margin-top: 20px;">
-        <h3>Neues Teil hinzufügen</h3>
-        <input type="text" id="name" placeholder="Name (z.B. Mischpult)">
-        <input type="number" id="amount" placeholder="Anzahl" value="1">
-        <button class="btn-main" onclick="addItem()">Hinzufügen</button>
+    <a href="event.html" class="nav-back">← Dashboard</a>
+    <h2>📦 Inventar Management</h2>
+
+    <!-- Hinzufügen Bereich -->
+    <div class="add-container">
+        <input type="text" id="itemName" placeholder="Gegenstand Name">
+        <input type="number" id="itemAmount" placeholder="Anzahl" value="1">
+        <button class="btn-add" onclick="addItem()">Gegenstand hinzufügen</button>
     </div>
 
+    <!-- Liste Bereich -->
+    <div id="list"></div>
+
     <script>
-        let inventory = JSON.parse(localStorage.getItem('ev_inv_v3')) || [];
+        let inventory = JSON.parse(localStorage.getItem('ev_inventory_vFinal')) || [];
 
         function render() {
-            const list = document.getElementById('inventory-list');
-            list.innerHTML = "";
+            const listDiv = document.getElementById('list');
+            listDiv.innerHTML = "";
 
             inventory.forEach((item, index) => {
-                const isBooked = item.start && item.end;
-                const div = document.createElement('div');
-                div.className = 'row';
-                div.innerHTML = `
-                    <div style="display: flex; justify-content: space-between;">
-                        <strong>${item.name} (${item.amount}x)</strong>
-                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:var(--red);">🗑️</button>
-                    </div>
-                    
-                    <button class="status-btn ${isBooked ? 'belegt' : 'frei'}">
-                        ${isBooked ? 'GEBUCHT' : 'FREI'}
-                    </button>
-                    
-                    <button onclick="toggleBookingField(${index})" style="background:none; border:none; color:var(--blue); font-size: 0.8rem; margin-left: 10px;">
-                        ${isBooked ? 'Zeitraum ändern' : '+ Zeitraum buchen'}
-                    </button>
+                const hasBooking = item.start && item.end;
+                const card = document.createElement('div');
+                card.className = 'item-card';
 
-                    <div id="book-${index}" class="booking-area">
-                        <input type="date" id="s-${index}" value="${item.start || ''}">
-                        <input type="date" id="e-${index}" value="${item.end || ''}">
-                        <button class="btn-main" style="background:var(--green); padding: 5px;" onclick="saveBooking(${index})">Speichern</button>
+                card.innerHTML = `
+                    <div class="item-header">
+                        <strong style="font-size: 1.1rem;">${item.name} (${item.amount}x)</strong>
+                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:var(--red); font-size: 1.3rem;">🗑️</button>
                     </div>
 
-                    ${isBooked ? `<div style="font-size: 0.8rem; color:#8b949e; margin-top:5px;">📅 ${item.start} bis ${item.end}</div>` : ''}
+                    <div class="status-indicator ${hasBooking ? 'belegt' : 'frei'}">
+                        ${hasBooking ? 'GEBUCHT' : 'FREI'}
+                    </div>
+
+                    <div class="booking-form">
+                        <div class="date-grid">
+                            <div>
+                                <label style="font-size: 0.7rem; color: #8b949e;">Von:</label>
+                                <input type="date" id="start-${index}" value="${item.start || ''}">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.7rem; color: #8b949e;">Bis:</label>
+                                <input type="date" id="end-${index}" value="${item.end || ''}">
+                            </div>
+                        </div>
+                        <button class="btn-save-date" onclick="updateBooking(${index})">Zeitraum speichern</button>
+                    </div>
+
+                    ${hasBooking ? `<div class="time-display">📅 Zeitraum: ${formatDate(item.start)} - ${formatDate(item.end)}</div>` : ''}
                 `;
-                list.appendChild(div);
+                listDiv.appendChild(card);
             });
         }
 
+        function formatDate(d) {
+            const date = new Date(d);
+            return date.toLocaleDateString('de-DE');
+        }
+
         function addItem() {
-            const name = document.getElementById('name').value;
-            const amount = document.getElementById('amount').value;
-            if(name) {
-                inventory.push({ name, amount, start: null, end: null });
+            const name = document.getElementById('itemName').value;
+            const amount = document.getElementById('itemAmount').value;
+            
+            if(name.trim() !== "") {
+                inventory.push({
+                    name: name,
+                    amount: amount,
+                    start: null,
+                    end: null
+                });
                 save();
-                document.getElementById('name').value = "";
+                document.getElementById('itemName').value = "";
                 render();
             }
         }
 
-        function toggleBookingField(index) {
-            const el = document.getElementById(`book-${index}`);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function saveBooking(index) {
-            const start = document.getElementById(`s-${index}`).value;
-            const end = document.getElementById(`e-${index}`).value;
-            if(start && end) {
-                inventory[index].start = start;
-                inventory[index].end = end;
-                save();
-                render();
-            }
+        function updateBooking(index) {
+            const start = document.getElementById(`start-${index}`).value;
+            const end = document.getElementById(`end-${index}`).value;
+            
+            inventory[index].start = start || null;
+            inventory[index].end = end || null;
+            save();
+            render();
         }
 
         function deleteItem(index) {
-            if(confirm("Löschen?")) {
+            if(confirm("Diesen Gegenstand löschen?")) {
                 inventory.splice(index, 1);
                 save();
                 render();
@@ -112,7 +190,7 @@
         }
 
         function save() {
-            localStorage.setItem('ev_inv_v3', JSON.stringify(inventory));
+            localStorage.setItem('ev_inventory_vFinal', JSON.stringify(inventory));
         }
 
         render();
