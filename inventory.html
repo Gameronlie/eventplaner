@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Inventar</title>
     <style>
         :root { --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; --text: #f0f6fc; }
@@ -18,7 +18,7 @@
             padding: 12px; border-radius: 8px; flex-grow: 1; font-size: 1rem;
         }
         .btn-add { background: #238636; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
-        .delete-btn { color: #f85149; background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+        .delete-btn { color: #f85149; background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
@@ -30,28 +30,41 @@
     <div id="inventory-list"></div>
 
     <div style="margin-top: 20px; display: flex; gap: 10px;">
-        <input type="text" id="invInput" placeholder="Z.B. Mischpult, Kabel...">
+        <input type="text" id="invInput" placeholder="Z.B. Lautsprecher, Kabel...">
         <button class="btn-add" onclick="addItem()">Hinzufügen</button>
     </div>
 
     <script>
-        // Lade Daten oder erstelle leeres Array falls nichts da ist
-        let inventory = JSON.parse(localStorage.getItem('ev_inventory')) || [];
+        // FUNKTIONS-CHECK: Initialisierung der Liste
+        function getInventory() {
+            const data = localStorage.getItem('ev_inventory');
+            try {
+                // Falls Daten da sind, umwandeln. Falls nicht oder Fehler, leeres Array [].
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                console.error("Speicherfehler:", e);
+                return [];
+            }
+        }
+
+        let inventory = getInventory();
 
         function render() {
             const container = document.getElementById('inventory-list');
             container.innerHTML = "";
             
             if (inventory.length === 0) {
-                container.innerHTML = "<p style='color: #8b949e;'>Noch keine Gegenstände eingetragen.</p>";
+                container.innerHTML = "<p id='empty-msg' style='color: #8b949e;'>Noch keine Gegenstände eingetragen.</p>";
             }
 
             inventory.forEach((item, index) => {
-                container.innerHTML += `
-                    <div class="row">
-                        <span style="flex-grow: 1;">${item}</span>
-                        <button class="delete-btn" onclick="removeItem(${index})">🗑️</button>
-                    </div>`;
+                const row = document.createElement('div');
+                row.className = 'row';
+                row.innerHTML = `
+                    <span style="flex-grow: 1;">${item}</span>
+                    <button class="delete-btn" onclick="removeItem(${index})">🗑️</button>
+                `;
+                container.appendChild(row);
             });
         }
 
@@ -61,23 +74,23 @@
             
             if (value !== "") {
                 inventory.push(value);
-                saveAndRender();
-                input.value = ""; // Feld leeren
-                input.focus(); // Fokus zurück aufs Feld für schnelles Tippen
+                saveData();
+                input.value = ""; 
+                render();
             }
         }
 
         function removeItem(index) {
             inventory.splice(index, 1);
-            saveAndRender();
-        }
-
-        function saveAndRender() {
-            localStorage.setItem('ev_inventory', JSON.stringify(inventory));
+            saveData();
             render();
         }
 
-        // Erstes Rendern beim Laden der Seite
+        function saveData() {
+            localStorage.setItem('ev_inventory', JSON.stringify(inventory));
+        }
+
+        // Seite beim Laden starten
         render();
     </script>
 </body>
