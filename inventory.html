@@ -5,33 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventar</title>
     <style>
-        body { background: #0b0e14; color: #f0f6fc; font-family: sans-serif; padding: 20px; }
-        .item-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        input { background: #161b22; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; flex: 1; }
-        .add-btn { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
+        :root { --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; --text: #f0f6fc; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; margin: 0; }
+        .nav { margin-bottom: 20px; }
+        .row { 
+            display: flex; align-items: center; gap: 10px; 
+            background: var(--card); padding: 12px; border-radius: 10px; 
+            margin-bottom: 8px; border: 1px solid #30363d; 
+        }
+        input[type="text"] { 
+            background: #0b0e14; border: 1px solid #30363d; color: white; 
+            padding: 12px; border-radius: 8px; flex-grow: 1; font-size: 1rem;
+        }
+        .btn-add { background: #238636; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
+        .delete-btn { color: #f85149; background: none; border: none; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body>
-    <a href="event.html" style="color: #58a6ff; text-decoration: none;">← Dashboard</a>
-    <h2>Inventar / Equipment</h2>
-    <div id="list"></div>
-    <div class="item-row">
-        <input type="text" id="newItem" placeholder="Gegenstand...">
-        <button class="add-btn" onclick="addItem()">+</button>
+    <div class="nav">
+        <a href="event.html" style="color: var(--blue); text-decoration: none;">← Dashboard</a>
+    </div>
+    <h2>📦 Event Inventar</h2>
+    
+    <div id="inventory-list"></div>
+
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <input type="text" id="invInput" placeholder="Z.B. Mischpult, Kabel...">
+        <button class="btn-add" onclick="addItem()">Hinzufügen</button>
     </div>
 
     <script>
-        let items = JSON.parse(localStorage.getItem('ev_inv')) || [];
-        const render = () => {
-            document.getElementById('list').innerHTML = items.map((it, i) => 
-                `<div class="item-row"><input value="${it}" readonly><button onclick="del(${i})" style="background:none; border:none; color:#f85149;">🗑️</button></div>`
-            ).join('');
-        };
-        function addItem() {
-            const val = document.getElementById('newItem').value;
-            if(val) { items.push(val); localStorage.setItem('ev_inv', JSON.stringify(items)); render(); document.getElementById('newItem').value = ""; }
+        // Lade Daten oder erstelle leeres Array falls nichts da ist
+        let inventory = JSON.parse(localStorage.getItem('ev_inventory')) || [];
+
+        function render() {
+            const container = document.getElementById('inventory-list');
+            container.innerHTML = "";
+            
+            if (inventory.length === 0) {
+                container.innerHTML = "<p style='color: #8b949e;'>Noch keine Gegenstände eingetragen.</p>";
+            }
+
+            inventory.forEach((item, index) => {
+                container.innerHTML += `
+                    <div class="row">
+                        <span style="flex-grow: 1;">${item}</span>
+                        <button class="delete-btn" onclick="removeItem(${index})">🗑️</button>
+                    </div>`;
+            });
         }
-        function del(i) { items.splice(i, 1); localStorage.setItem('ev_inv', JSON.stringify(items)); render(); }
+
+        function addItem() {
+            const input = document.getElementById('invInput');
+            const value = input.value.trim();
+            
+            if (value !== "") {
+                inventory.push(value);
+                saveAndRender();
+                input.value = ""; // Feld leeren
+                input.focus(); // Fokus zurück aufs Feld für schnelles Tippen
+            }
+        }
+
+        function removeItem(index) {
+            inventory.splice(index, 1);
+            saveAndRender();
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('ev_inventory', JSON.stringify(inventory));
+            render();
+        }
+
+        // Erstes Rendern beim Laden der Seite
         render();
     </script>
 </body>
