@@ -3,114 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Inventar & Buchung</title>
+    <title>Inventar Smart-Check</title>
     <style>
         :root { 
-            --bg: #0b0e14; 
-            --card: #161b22; 
-            --blue: #58a6ff; 
-            --green: #238636; 
-            --red: #f85149; 
-            --text: #f0f6fc; 
+            --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; 
+            --green: #238636; --red: #f85149; --text: #f0f6fc; 
         }
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: 'Segoe UI', sans-serif; 
-            padding: 20px; 
-            margin: 0; 
-        }
-        .nav-back { color: var(--blue); text-decoration: none; display: inline-block; margin-bottom: 20px; }
-        
-        /* Eingabebereich */
-        .add-container { 
-            background: var(--card); 
-            padding: 20px; 
-            border-radius: 15px; 
-            border: 1px solid var(--blue); 
-            margin-bottom: 30px; 
-        }
-        input { 
-            background: #0b0e14; 
-            border: 1px solid #30363d; 
-            color: white; 
-            padding: 12px; 
-            border-radius: 8px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            margin-bottom: 10px; 
-            font-size: 1rem;
-        }
-        .btn-add { 
-            background: var(--blue); 
-            color: white; 
-            border: none; 
-            padding: 12px; 
-            border-radius: 8px; 
-            width: 100%; 
-            font-weight: bold; 
-            cursor: pointer; 
-        }
-
-        /* Liste */
-        .item-card { 
-            background: var(--card); 
-            padding: 15px; 
-            border-radius: 12px; 
-            margin-bottom: 15px; 
-            border: 1px solid #30363d; 
-        }
-        .item-header { display: flex; justify-content: space-between; align-items: center; }
-        
-        .status-indicator { 
-            display: inline-block; 
-            padding: 6px 12px; 
-            border-radius: 20px; 
-            font-size: 0.8rem; 
-            font-weight: bold; 
-            margin-top: 10px; 
-        }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; margin: 0; }
+        .nav-back { color: var(--blue); text-decoration: none; margin-bottom: 20px; display: inline-block; }
+        .add-container { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid var(--blue); margin-bottom: 30px; }
+        input { background: #0b0e14; border: 1px solid #30363d; color: white; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        .btn-add { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+        .item-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #30363d; }
+        .status-indicator { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; margin-top: 10px; }
         .frei { background: var(--green); }
         .belegt { background: var(--red); }
-
-        .booking-form { 
-            margin-top: 15px; 
-            padding-top: 15px; 
-            border-top: 1px solid #30363d; 
-        }
-        .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-save-date { 
-            background: var(--green); 
-            color: white; 
-            border: none; 
-            padding: 8px; 
-            border-radius: 6px; 
-            margin-top: 10px; 
-            width: 100%; 
-            font-size: 0.9rem;
-        }
-        .time-display { font-size: 0.85rem; color: #8b949e; margin-top: 8px; }
+        .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .btn-save-date { background: var(--green); color: white; border: none; padding: 8px; border-radius: 6px; margin-top: 10px; width: 100%; }
     </style>
 </head>
 <body>
 
     <a href="event.html" class="nav-back">← Dashboard</a>
-    <h2>📦 Inventar Management</h2>
+    <h2>📦 Inventar (Auto-Update)</h2>
 
-    <!-- Hinzufügen Bereich -->
     <div class="add-container">
         <input type="text" id="itemName" placeholder="Gegenstand Name">
         <input type="number" id="itemAmount" placeholder="Anzahl" value="1">
         <button class="btn-add" onclick="addItem()">Gegenstand hinzufügen</button>
     </div>
 
-    <!-- Liste Bereich -->
     <div id="list"></div>
 
     <script>
         let inventory = JSON.parse(localStorage.getItem('ev_inventory_vFinal')) || [];
 
+        function checkExpiry() {
+            const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            let changed = false;
+
+            inventory.forEach(item => {
+                // Wenn ein Enddatum gesetzt ist und dieses VOR heute liegt
+                if (item.end && item.end < today) {
+                    item.start = null;
+                    item.end = null;
+                    changed = true;
+                }
+            });
+
+            if (changed) {
+                save(); // Speichere die bereinigte Liste
+            }
+        }
+
         function render() {
+            checkExpiry(); // Prüfe vor dem Zeichnen, ob Buchungen abgelaufen sind
+            
             const listDiv = document.getElementById('list');
             listDiv.innerHTML = "";
 
@@ -120,51 +68,32 @@
                 card.className = 'item-card';
 
                 card.innerHTML = `
-                    <div class="item-header">
-                        <strong style="font-size: 1.1rem;">${item.name} (${item.amount}x)</strong>
-                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:var(--red); font-size: 1.3rem;">🗑️</button>
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${item.name} (${item.amount}x)</strong>
+                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:var(--red);">🗑️</button>
                     </div>
 
                     <div class="status-indicator ${hasBooking ? 'belegt' : 'frei'}">
                         ${hasBooking ? 'GEBUCHT' : 'FREI'}
                     </div>
 
-                    <div class="booking-form">
+                    <div style="margin-top: 15px; border-top: 1px solid #30363d; padding-top: 10px;">
                         <div class="date-grid">
-                            <div>
-                                <label style="font-size: 0.7rem; color: #8b949e;">Von:</label>
-                                <input type="date" id="start-${index}" value="${item.start || ''}">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.7rem; color: #8b949e;">Bis:</label>
-                                <input type="date" id="end-${index}" value="${item.end || ''}">
-                            </div>
+                            <input type="date" id="start-${index}" value="${item.start || ''}">
+                            <input type="date" id="end-${index}" value="${item.end || ''}">
                         </div>
-                        <button class="btn-save-date" onclick="updateBooking(${index})">Zeitraum speichern</button>
+                        <button class="btn-save-date" onclick="updateBooking(${index})">Zeitraum buchen</button>
                     </div>
-
-                    ${hasBooking ? `<div class="time-display">📅 Zeitraum: ${formatDate(item.start)} - ${formatDate(item.end)}</div>` : ''}
                 `;
                 listDiv.appendChild(card);
             });
         }
 
-        function formatDate(d) {
-            const date = new Date(d);
-            return date.toLocaleDateString('de-DE');
-        }
-
         function addItem() {
             const name = document.getElementById('itemName').value;
             const amount = document.getElementById('itemAmount').value;
-            
             if(name.trim() !== "") {
-                inventory.push({
-                    name: name,
-                    amount: amount,
-                    start: null,
-                    end: null
-                });
+                inventory.push({ name: name, amount: amount, start: null, end: null });
                 save();
                 document.getElementById('itemName').value = "";
                 render();
@@ -174,7 +103,6 @@
         function updateBooking(index) {
             const start = document.getElementById(`start-${index}`).value;
             const end = document.getElementById(`end-${index}`).value;
-            
             inventory[index].start = start || null;
             inventory[index].end = end || null;
             save();
@@ -182,7 +110,7 @@
         }
 
         function deleteItem(index) {
-            if(confirm("Diesen Gegenstand löschen?")) {
+            if(confirm("Löschen?")) {
                 inventory.splice(index, 1);
                 save();
                 render();
