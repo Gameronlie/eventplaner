@@ -2,29 +2,27 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Planer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Event Dashboard</title>
     <style>
-        body { background: #0b0e14; color: #f0f6fc; font-family: sans-serif; padding: 20px; }
-        textarea { width: 100%; background: #161b22; color: #58a6ff; border: 1px solid #30363d; padding: 15px; border-radius: 10px; box-sizing: border-box; }
-        .save-btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; margin-top: 10px; font-weight: bold; }
+        :root { --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; --text: #f0f6fc; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
+        .dash-btn { 
+            background: var(--card); border: 1px solid #30363d; border-radius: 15px; 
+            padding: 25px; text-align: center; color: var(--text); text-decoration: none;
+            display: flex; flex-direction: column; gap: 10px; font-weight: bold;
+        }
+        .dash-btn:active { background: #1c2128; transform: scale(0.98); }
     </style>
 </head>
 <body>
-    <h2>Event Notizen</h2>
-    <textarea id="data" rows="10" placeholder="Hier planen..."></textarea>
-    <button class="save-btn" onclick="save()">AUF HANDY SPEICHERN</button>
-    <p id="out" style="color: #8b949e; font-size: 0.8rem;"></p>
-
-    <script>
-        // Lädt Daten vom Samsung Speicher
-        document.getElementById('data').value = localStorage.getItem('ev_data') || "";
-
-        function save() {
-            const val = document.getElementById('data').value;
-            localStorage.setItem('ev_data', val); // Kostet 0€ Bandbreite
-            document.getElementById('out').innerText = "Gespeichert!";
-        }
-    </script>
+    <h1 style="color: var(--blue);">Event Dashboard</h1>
+    <div class="grid">
+        <a href="planning.html" class="dash-btn"><span>📅</span>Planung</a>
+        <a href="checklist.html" class="dash-btn"><span>✅</span>Checkliste</a>
+        <a href="contacts.html" class="dash-btn"><span>👤</span>Kontakte</a>
+        <a href="notes.html" class="dash-btn"><span>📝</span>Notizen</a>
+    </div>
 </body>
 </html>
