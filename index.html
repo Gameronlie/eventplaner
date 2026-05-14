@@ -2,31 +2,53 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Event Setup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Event Portal</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        body { background: #0b0e14; color: white; font-family: sans-serif; text-align: center; padding: 50px 20px; }
-        .btn { background: #238636; color: white; border: none; padding: 20px; border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer; }
-        .link { display: block; margin-top: 20px; color: #58a6ff; text-decoration: none; }
+        :root { --bg: #0b0e14; --blue: #58a6ff; }
+        body { background: var(--bg); margin: 0; font-family: sans-serif; }
+
+        /* Ladescreen */
+        #splash {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 100;
+        }
+
+        .loader {
+            border: 4px solid #161b22;
+            border-top: 4px solid var(--blue);
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <h1>Event Portal</h1>
-    <button id="install" class="btn" style="display:none;">APP INSTALLIEREN</button>
-    <a href="event.html" class="link">Direkt zum Planer →</a>
+
+    <div id="splash">
+        <div class="loader"></div>
+        <p style="color: var(--blue); margin-top: 15px;">Lade Dashboard...</p>
+    </div>
 
     <script>
-        let promptEvt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            promptEvt = e;
-            document.getElementById('install').style.display = 'block';
-        });
-        document.getElementById('install').addEventListener('click', () => {
-            if(promptEvt) promptEvt.prompt();
-        });
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+        window.onload = () => {
+            // Kurze Verzögerung für das "App-Gefühl"
+            setTimeout(() => {
+                // Leitet direkt zum Dashboard weiter
+                window.location.href = "event.html";
+            }, 1200);
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
     </script>
 </body>
 </html>
