@@ -5,126 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Projekt Portal</title>
     
-    <!-- PWA & iPad App Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Eventplaner">
-    
-    <!-- Verknüpfungen für Icon und Installation -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="Gemini_Generated_Image_bu298gbu298gbu29.png">
 
     <style>
-        :root {
-            --bg-color: #0b0e14;
-            --card-bg: #161b22;
-            --accent-blue: #58a6ff;
-            --button-blue: #1f6feb;
-            --text-main: #f0f6fc;
-            --text-dim: #8b949e;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* Portal-Design wie in Screenshot 2026-05-14 015931.png */
-        .portal-card {
-            background: var(--card-bg);
-            padding: 50px;
-            border-radius: 24px;
-            text-align: center;
-            border: 1px solid #30363d;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
-            width: 85%;
-            max-width: 450px;
-        }
-
-        h1 {
-            color: var(--accent-blue);
-            font-weight: 700;
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            letter-spacing: -1px;
-        }
-
-        .status-text {
-            color: var(--text-dim);
-            margin-bottom: 35px;
-            font-size: 1.1rem;
-            line-height: 1.5;
-        }
-
-        /* Button für schnelle Reaktion am Tablet */
-        .main-button {
-            background-color: var(--button-blue);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 20px;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: transform 0.1s;
-            touch-action: manipulation;
-            box-shadow: 0 8px 20px rgba(31, 111, 235, 0.3);
-        }
-
-        .main-button:active {
-            transform: scale(0.96);
-            background-color: #1158c7;
-        }
-
-        .branding {
-            position: absolute;
-            bottom: 30px;
-            font-size: 0.75rem;
-            color: #30363d;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        :root { --bg: #0b0e14; --card: #161b22; --blue: #1f6feb; --text: #f0f6fc; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .portal-card { background: var(--card); padding: 40px; border-radius: 20px; text-align: center; border: 1px solid #30363d; width: 80%; max-width: 400px; }
+        h1 { color: #58a6ff; }
+        .btn { background: var(--blue); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-size: 1.1rem; cursor: pointer; width: 100%; margin-top: 10px; touch-action: manipulation; }
+        #installBtn { display: none; background: #238636; } /* Grün für Installation */
     </style>
 </head>
 <body>
 
     <div class="portal-card">
         <h1>Projekt Portal</h1>
-        <p class="status-text">
-            Offline-Modus aktiv. Du kannst diese Seite jetzt zum Home-Bildschirm hinzufügen.
-        </p>
+        <p>System bereit für Offline-Modus.</p>
         
-        <button class="main-button" ontouchstart="" onclick="startSystem()">
-            Starten
-        </button>
+        <!-- Button zum Installieren (wird nur angezeigt wenn möglich) -->
+        <button id="installBtn" class="btn">App Installieren</button>
+        
+        <!-- Button zum Starten der App -->
+        <button class="btn" onclick="openConfig()">App Konfigurieren</button>
     </div>
 
-    <div class="branding">Secure PWA Environment | Gameronlie</div>
-
     <script>
-        function startSystem() {
-            // Bananen-Check: App-Logik hier einfügen
-            alert("Bananen-Check: System bereit!");
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        // Erkennt, ob die App installiert werden kann (Chrome/Android/PC)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'block';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('App wurde installiert');
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        // Konfigurations-Logik
+        function openConfig() {
+            const mode = prompt("Konfiguration: (1) Event-Planer, (2) Autohaus Schnecke, (3) Music-Production");
+            if(mode == "1") alert("Modus: Event-Planer aktiv");
+            else if(mode == "2") alert("Modus: Autohaus Schnecke aktiv");
+            else if(mode == "3") alert("Modus: Music-Production aktiv");
+            else alert("Bananen-Check: Standard-Modus");
         }
 
-        // Service Worker Registrierung für echtes "App-Gefühl" am iPad
+        // Service Worker Registrierung (Pflicht für Offline!)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('App bereit!', reg))
-                .catch(err => console.log('Fehler beim Registrieren:', err));
-            });
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </body>
