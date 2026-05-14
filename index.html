@@ -4,56 +4,112 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projekt Portal</title>
+    
+    <!-- Manifest für die Android-Installation -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b0e14">
 
     <style>
-        body { background: #0b0e14; color: #58a6ff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #161b22; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #30363d; width: 320px; }
-        .btn { background: #1f6feb; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        #install-area { display: none; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid #30363d; }
+        :root {
+            --bg: #0b0e14;
+            --card: #161b22;
+            --blue: #1f6feb;
+            --green: #238636;
+            --text: #f0f6fc;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+
+        .portal-card { 
+            background: var(--card); 
+            padding: 35px; 
+            border-radius: 20px; 
+            text-align: center; 
+            border: 1px solid #30363d; 
+            width: 320px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        h1 { color: #58a6ff; margin-bottom: 20px; }
+
+        .btn { 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            border-radius: 10px; 
+            width: 100%; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        #install-banner { 
+            display: none; 
+            background: rgba(35, 134, 54, 0.1);
+            border: 1px solid var(--green);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        #download-btn { background: var(--green); }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div id="install-area">
-            <p style="color: #fff;">App verfügbar!</p>
-            <button class="btn" id="download-button" style="background: #238636;">APP HERUNTERLADEN</button>
+
+    <div class="portal-card">
+        <!-- Dieser Bereich erscheint nur auf deinem Samsung -->
+        <div id="install-banner">
+            <p style="margin: 0 0 10px 0;">App auf Handy laden?</p>
+            <button class="btn" id="download-btn">JETZT INSTALLIEREN</button>
         </div>
         
         <h1>Projekt Portal</h1>
-        <button class="btn" onclick="konfig()">Konfigurieren</button>
+        <p style="color: #8b949e; font-size: 0.9rem;">System bereit</p>
+        <button class="btn" onclick="konfigurieren()">App konfigurieren</button>
     </div>
 
     <script>
         let deferredPrompt;
-        const installArea = document.getElementById('install-area');
-        const downloadBtn = document.getElementById('download-button');
 
-        // Android/Chrome erkennt die App und bereitet den Download vor
+        // Wartet auf das Android-Signal zum Installieren
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installArea.style.display = 'block';
+            document.getElementById('install-banner').style.display = 'block';
         });
 
-        downloadBtn.addEventListener('click', async () => {
+        document.getElementById('download-btn').addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
-                    installArea.style.display = 'none';
+                    document.getElementById('install-banner').style.display = 'none';
                 }
                 deferredPrompt = null;
             }
         });
 
-        function konfig() {
-            let mode = prompt("Modus wählen: 1 (Event), 2 (Auto), 3 (Musik)");
-            localStorage.setItem('portal_mode', mode);
-            alert("Modus " + mode + " gespeichert!");
+        function konfigurieren() {
+            let val = prompt("Modus eingeben (1, 2 oder 3):");
+            if(val) {
+                localStorage.setItem('pwa_mode', val);
+                alert("Konfiguration gespeichert!");
+            }
         }
 
+        // Der Service Worker ist der Motor für den Offline-Modus
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
         }
