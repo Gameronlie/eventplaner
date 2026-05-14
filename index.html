@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eventplaner | Privat</title>
+    <title>Projekt Portal</title>
     
     <!-- PWA & iPad App Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Eventplaner">
     
-    <!-- Verknüpfung zum Bild direkt im Hauptverzeichnis -->
+    <!-- Verknüpfungen für Icon und Installation -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="Gemini_Generated_Image_bu298gbu298gbu29.png">
 
@@ -39,33 +39,34 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .app-container {
+        /* Portal-Design wie in Screenshot 2026-05-14 015931.png */
+        .portal-card {
             background: var(--card-bg);
-            padding: 40px;
-            border-radius: 28px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            padding: 50px;
+            border-radius: 24px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid #30363d;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
             width: 85%;
-            max-width: 420px;
+            max-width: 450px;
         }
 
         h1 {
+            color: var(--accent-blue);
             font-weight: 700;
-            font-size: 2.2rem;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
             letter-spacing: -1px;
-            background: linear-gradient(135deg, #fff 0%, var(--accent-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        .subtitle {
+        .status-text {
             color: var(--text-dim);
             margin-bottom: 35px;
             font-size: 1.1rem;
+            line-height: 1.5;
         }
 
+        /* Button für schnelle Reaktion am Tablet */
         .main-button {
             background-color: var(--button-blue);
             color: white;
@@ -74,23 +75,16 @@
             padding: 20px;
             font-size: 1.3rem;
             font-weight: 600;
-            border-radius: 16px;
+            border-radius: 14px;
             cursor: pointer;
             transition: transform 0.1s;
             touch-action: manipulation;
-            box-shadow: 0 8px 20px rgba(31, 111, 235, 0.4);
+            box-shadow: 0 8px 20px rgba(31, 111, 235, 0.3);
         }
 
         .main-button:active {
             transform: scale(0.96);
-        }
-
-        #event-list {
-            margin-top: 20px;
-            text-align: left;
-            max-height: 150px;
-            overflow-y: auto;
-            color: var(--accent-blue);
+            background-color: #1158c7;
         }
 
         .branding {
@@ -105,29 +99,32 @@
 </head>
 <body>
 
-    <div class="app-container">
-        <h1>Eventplaner</h1>
-        <p class="subtitle">Private Planungstool</p>
+    <div class="portal-card">
+        <h1>Projekt Portal</h1>
+        <p class="status-text">
+            Offline-Modus aktiv. Du kannst diese Seite jetzt zum Home-Bildschirm hinzufügen.
+        </p>
         
-        <button class="main-button" ontouchstart="" onclick="startePlanung()">
-            Neues Event planen
+        <button class="main-button" ontouchstart="" onclick="startSystem()">
+            Starten
         </button>
-
-        <div id="event-list"></div>
     </div>
 
-    <div class="branding">Secure PWA | Gameronlie</div>
+    <div class="branding">Secure PWA Environment | Gameronlie</div>
 
     <script>
-        function startePlanung() {
-            let name = prompt("Wie soll das Event heißen?");
-            if (name) {
-                const list = document.getElementById('event-list');
-                const entry = document.createElement('p');
-                entry.textContent = "📅 " + name;
-                list.appendChild(entry);
-                console.log("Event erstellt: " + name);
-            }
+        function startSystem() {
+            // Bananen-Check: App-Logik hier einfügen
+            alert("Bananen-Check: System bereit!");
+        }
+
+        // Service Worker Registrierung für echtes "App-Gefühl" am iPad
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('App bereit!', reg))
+                .catch(err => console.log('Fehler beim Registrieren:', err));
+            });
         }
     </script>
 </body>
