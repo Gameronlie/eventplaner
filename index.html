@@ -2,132 +2,122 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Projekt Portal</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b0e14">
 
     <style>
+        /* Modernes App-Design: Dunkel mit Blau */
         :root {
             --bg: #0b0e14;
             --card: #161b22;
             --blue: #58a6ff;
-            --btn-color: #1f6feb;
             --text: #f0f6fc;
+            --dim: #8b949e;
         }
 
         body { 
             background: var(--bg); 
             color: var(--text); 
-            font-family: sans-serif; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
             margin: 0; 
             display: flex; 
             flex-direction: column;
             height: 100vh;
+            overflow: hidden;
         }
 
-        /* Versteckt alles, was nach Browser aussieht */
-        .app-view {
-            display: none; /* Wird per JS aktiviert */
+        /* Das hier lässt es wie eine App aussehen */
+        .app-header {
             padding: 20px;
+            background: var(--card);
+            border-bottom: 1px solid #30363d;
+            text-align: center;
+        }
+
+        .content-area {
             flex-grow: 1;
-        }
-
-        .web-view {
+            padding: 20px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            flex-direction: column;
+            gap: 15px;
         }
 
-        .card { 
-            background: var(--card); 
-            padding: 30px; 
-            border-radius: 15px; 
-            text-align: center; 
+        .module-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
             border: 1px solid #30363d;
-            width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .btn { 
-            background: var(--btn-color); 
+            background: #1f6feb; 
             color: white; 
             border: none; 
-            padding: 15px; 
-            border-radius: 10px; 
-            width: 100%; 
+            padding: 18px; 
+            border-radius: 12px; 
             font-weight: bold;
-            margin-top: 10px;
+            font-size: 1rem;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(31, 111, 235, 0.3);
         }
 
-        .portal-header {
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+        /* Versteckt das Web-Gefühl */
+        #web-hint {
+            font-size: 0.8rem;
+            color: var(--dim);
+            text-align: center;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <!-- ANSICHT 1: Nur im Browser sichtbar -->
-    <div id="web-interface" class="web-view">
-        <div class="card">
-            <h1>Projekt Portal</h1>
-            <p>Öffne die installierte App für den vollen Funktionsumfang.</p>
-            <button class="btn" onclick="konfig()">Konfiguration</button>
-        </div>
+    <div class="app-header">
+        <h1 id="app-title" style="margin:0; font-size: 1.4rem; color: var(--blue);">Projekt Portal</h1>
     </div>
 
-    <!-- ANSICHT 2: Nur in der App sichtbar -->
-    <div id="app-interface" class="app-view">
-        <div class="portal-header">
-            <h1 id="portal-title">Lädt...</h1>
+    <div class="content-area">
+        <div class="module-card">
+            <h2 id="module-name" style="margin-top:0;">System-Check</h2>
+            <p id="module-desc" style="color: var(--dim);">Konfiguriere dein Portal für Events, Musik oder Business.</p>
         </div>
-        <div id="content">
-            <!-- Hier kommen deine App-Inhalte rein -->
-            <p>Willkommen in deiner privaten Offline-Umgebung.</p>
-            <div id="custom-area"></div>
-        </div>
-        <button class="btn" onclick="konfig()" style="margin-top: auto;">Einstellungen</button>
+
+        <button class="btn" onclick="updateConfig()">Portal konfigurieren</button>
+        <div id="web-hint">V1.0.2 - Offline Ready</div>
     </div>
 
     <script>
-        // Bananen-Check: Sind wir in der App oder im Browser?
-        const isApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        // Erkennt den Modus und ändert das Aussehen sofort
+        function applyDesign() {
+            const mode = localStorage.getItem('portal_mode');
+            const title = document.getElementById('module-name');
+            const desc = document.getElementById('module-desc');
 
-        if (isApp) {
-            document.getElementById('web-interface').style.display = 'none';
-            document.getElementById('app-interface').style.display = 'block';
-            loadPortal();
-        }
-
-        function konfig() {
-            let mode = prompt("Modus wählen: 1 (Event), 2 (Auto), 3 (Musik)");
-            if(mode) {
-                localStorage.setItem('portal_mode', mode);
-                location.reload(); // Lädt die App mit neuem Modus neu
-            }
-        }
-
-        function loadPortal() {
-            const mode = localStorage.getItem('portal_mode') || "0";
-            const title = document.getElementById('portal-title');
-            const area = document.getElementById('custom-area');
-
-            if(mode === "1") {
-                title.innerText = "Event Planung";
-                area.innerHTML = "<p>Bereit für neue Events.</p>";
-            } else if(mode === "2") {
+            if (mode === "1") {
+                title.innerText = "Event Planer";
+                desc.innerText = "Verwalte deine privaten Events und Zeitpläne.";
+            } else if (mode === "2") {
                 title.innerText = "Autohaus Schnecke";
-                area.innerHTML = "<p>Social Media & Kalkulation aktiv.</p>";
-            } else if(mode === "3") {
+                desc.innerText = "Social Media Management & Kalkulationen.";
+            } else if (mode === "3") {
                 title.innerText = "Musik Produktion";
-                area.innerHTML = "<p>Cubase & FL Studio Workflow.</p>";
-            } else {
-                title.innerText = "Projekt Portal";
-                area.innerHTML = "<p>Bitte Modus konfigurieren.</p>";
+                desc.innerText = "Mixing/Mastering Workflow für Pop & Schlager.";
             }
         }
+
+        function updateConfig() {
+            let val = prompt("Modus: 1 (Event), 2 (Auto), 3 (Musik)");
+            if(val) {
+                localStorage.setItem('portal_mode', val);
+                applyDesign(); // Design ändert sich sofort ohne Refresh!
+            }
+        }
+
+        // Beim Start Design laden
+        applyDesign();
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
