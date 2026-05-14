@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notizen</title>
+    <style>
+        body { background: #0b0e14; color: #f0f6fc; font-family: sans-serif; padding: 20px; }
+        .nav { display: flex; justify-content: space-between; align-items: center; }
+        textarea { 
+            width: 100%; height: 70vh; background: #161b22; color: #58a6ff; 
+            border: 1px solid #30363d; border-radius: 10px; padding: 15px; 
+            box-sizing: border-box; margin-top: 20px; font-size: 1rem;
+        }
+        .status { color: #8b949e; font-size: 0.8rem; text-align: right; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="event.html" style="color: #58a6ff; text-decoration: none;">← Dashboard</a>
+        <h2 style="margin:0;">Notizen</h2>
+    </div>
+
+    <textarea id="note-input" oninput="autoSave()" placeholder="Schreib hier deine Ideen..."></textarea>
+    <p id="status" class="status"></p>
+
+    <script>
+        // Laden beim Öffnen
+        document.getElementById('note-input').value = localStorage.getItem('ev_notes') || "";
+
+        function autoSave() {
+            const content = document.getElementById('note-input').value;
+            localStorage.setItem('ev_notes', content); // Speichert lokal auf deinem Samsung
+            document.getElementById('status').innerText = "Gespeichert: " + new Date().toLocaleTimeString();
+        }
+    </script>
+</body>
+</html>
