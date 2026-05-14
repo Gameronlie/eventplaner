@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkliste</title>
+    <style>
+        body { background: #0b0e14; color: #f0f6fc; font-family: sans-serif; padding: 20px; }
+        .row { display: flex; align-items: center; gap: 10px; background: #161b22; padding: 12px; border-radius: 10px; margin-bottom: 8px; border: 1px solid #30363d; }
+        input[type="text"] { background: #0b0e14; border: 1px solid #30363d; color: white; padding: 10px; border-radius: 8px; flex-grow: 1; }
+        .add-area { margin-top: 20px; display: flex; gap: 10px; }
+        .btn-add { background: #238636; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; }
+        .delete { color: #f85149; background: none; border: none; font-size: 1.2rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <a href="event.html" style="color: #58a6ff; text-decoration: none;">← Dashboard</a>
+    <h2>Checkliste</h2>
+    
+    <div id="list-container"></div>
+
+    <div class="add-area">
+        <input type="text" id="taskInput" placeholder="Neue Aufgabe...">
+        <button class="btn-add" onclick="addTask()">Hinzufügen</button>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('ev_check')) || [];
+
+        function render() {
+            const container = document.getElementById('list-container');
+            container.innerHTML = "";
+            tasks.forEach((t, i) => {
+                container.innerHTML += `
+                    <div class="row">
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onclick="toggle(${i})">
+                        <span style="flex-grow:1; ${t.done ? 'text-decoration:line-through; color:#8b949e' : ''}">${t.text}</span>
+                        <button class="delete" onclick="remove(${i})">🗑️</button>
+                    </div>`;
+            });
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            if(input.value.trim() !== "") {
+                tasks.push({ text: input.value, done: false });
+                save();
+                input.value = "";
+                render();
+            }
+        }
+
+        function toggle(i) { tasks[i].done = !tasks[i].done; save(); render(); }
+        function remove(i) { tasks.splice(i, 1); save(); render(); }
+        function save() { localStorage.setItem('ev_check', JSON.stringify(tasks)); }
+
+        render();
+    </script>
+</body>
+</html>
