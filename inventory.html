@@ -9,73 +9,58 @@
             --bg: #0b0e14; --card: #161b22; --blue: #58a6ff; 
             --green: #238636; --red: #f85149; --orange: #d29922; --text: #f0f6fc; 
         }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; padding: 20px; margin: 0; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; padding: 20px; margin: 0; }
         .nav-back { color: var(--blue); text-decoration: none; margin-bottom: 20px; display: block; font-weight: bold; }
         
-        /* Input Styling */
-        .add-container { 
-            background: var(--card); padding: 20px; border-radius: 16px; 
-            border: 1px solid #30363d; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        input { 
-            background: #0b0e14; border: 1px solid #30363d; color: white; 
-            padding: 14px; border-radius: 10px; width: 100%; box-sizing: border-box; 
-            margin-bottom: 12px; font-size: 1rem; transition: border 0.3s;
-        }
-        input:focus { border-color: var(--blue); outline: none; }
-        .btn-add { 
-            background: var(--blue); color: white; border: none; padding: 14px; 
-            border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem;
-        }
+        .add-container { background: var(--card); padding: 20px; border-radius: 16px; border: 1px solid #30363d; margin-bottom: 25px; }
+        input { background: #0b0e14; border: 1px solid #30363d; color: white; padding: 14px; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 1rem; }
+        .btn-add { background: var(--blue); color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
 
-        /* Card Styling */
-        .item-card { 
-            background: var(--card); padding: 18px; border-radius: 16px; 
-            margin-bottom: 16px; border: 1px solid #30363d; position: relative;
-            animation: fadeIn 0.3s ease;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .status-badge { 
-            display: inline-block; padding: 6px 14px; border-radius: 20px; 
-            font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .frei { background: var(--green); color: white; }
-        .reserviert { background: var(--orange); color: white; }
-        .belegt { background: var(--red); color: white; }
+        .item-card { background: var(--card); padding: 18px; border-radius: 16px; margin-bottom: 16px; border: 1px solid #30363d; }
+        .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; }
+        
+        .frei { background: var(--green); }
+        .reserviert { background: var(--orange); }
+        .belegt { background: var(--red); }
 
         .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        .btn-save-date { 
-            background: rgba(88, 166, 255, 0.1); color: var(--blue); border: 1px solid var(--blue); 
-            padding: 10px; border-radius: 8px; margin-top: 12px; width: 100%; font-weight: bold;
-        }
-        .time-label { font-size: 0.7rem; color: #8b949e; margin-bottom: 4px; display: block; }
+        .btn-save-date { background: transparent; color: var(--blue); border: 1px solid var(--blue); padding: 10px; border-radius: 8px; margin-top: 12px; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <a href="event.html" class="nav-back">← ZURÜCK</a>
-    <h2 style="margin-bottom: 25px;">📦 Inventar & Status</h2>
+    <h2>📦 Inventar & Status</h2>
 
     <div class="add-container">
         <input type="text" id="itemName" placeholder="Gegenstand Name">
         <input type="number" id="itemAmount" placeholder="Anzahl" value="1">
-        <button class="btn-add" onclick="addItem()">HINZUFÜGEN</button>
+        <button class="btn-add" onclick="addItem()">HINZÜFÜGEN</button>
     </div>
 
     <div id="list"></div>
 
     <script>
-        let inventory = JSON.parse(localStorage.getItem('ev_inventory_vFinal')) || [];
+        // Wir nutzen einen komplett neuen Key, um alte Fehler zu löschen
+        const STORAGE_KEY = 'ev_inventory_PRO_V1';
+        let inventory = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
         function getStatus(start, end) {
             if (!start || !end) return { label: 'FREI', class: 'frei' };
+            
+            // Heutiges Datum auf 00:00:00 setzen für sauberen Vergleich
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const startDate = new Date(start);
+            startDate.setHours(0,0,0,0);
+            
+            const endDate = new Date(end);
+            endDate.setHours(0,0,0,0);
 
-            const today = new Date().toISOString().split('T')[0];
-
-            if (end < today) return { label: 'FREI', class: 'frei' }; // Abgelaufen
-            if (start > today) return { label: 'RESERVIERT', class: 'reserviert' }; // In der Zukunft
-            return { label: 'BELEGT', class: 'belegt' }; // Aktuell
+            if (endDate < today) return { label: 'FREI', class: 'frei' };
+            if (startDate > today) return { label: 'RESERVIERT', class: 'reserviert' };
+            return { label: 'BELEGT', class: 'belegt' };
         }
 
         function render() {
@@ -85,7 +70,7 @@
             inventory.forEach((item, index) => {
                 const status = getStatus(item.start, item.end);
                 
-                // Falls abgelaufen, bereinigen wir die Daten im Hintergrund
+                // Automatisches Frei-Schalten nach Ablauf
                 if (status.label === 'FREI' && item.start) {
                     item.start = null;
                     item.end = null;
@@ -95,31 +80,16 @@
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 card.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <div>
-                            <div style="font-size: 1.2rem; font-weight: bold;">${item.name}</div>
-                            <div style="color: #8b949e; font-size: 0.9rem; margin-top: 2px;">Menge: ${item.amount}x</div>
-                        </div>
-                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:var(--red); font-size: 1.2rem; padding: 5px;">🗑️</button>
+                    <div style="display: flex; justify-content: space-between;">
+                        <strong>${item.name} (${item.amount}x)</strong>
+                        <button onclick="deleteItem(${index})" style="background:none; border:none; color:var(--red);">🗑️</button>
                     </div>
-
-                    <div class="status-badge ${status.class}" style="margin-top: 12px;">
-                        ${status.label}
+                    <div class="status-badge ${status.class}" style="margin-top: 10px;">${status.label}</div>
+                    <div class="date-grid">
+                        <input type="date" id="start-${index}" value="${item.start || ''}">
+                        <input type="date" id="end-${index}" value="${item.end || ''}">
                     </div>
-
-                    <div style="margin-top: 18px; border-top: 1px solid #30363d; padding-top: 15px;">
-                        <div class="date-grid">
-                            <div>
-                                <span class="time-label">VON</span>
-                                <input type="date" id="start-${index}" value="${item.start || ''}">
-                            </div>
-                            <div>
-                                <span class="time-label">BIS</span>
-                                <input type="date" id="end-${index}" value="${item.end || ''}">
-                            </div>
-                        </div>
-                        <button class="btn-save-date" onclick="updateBooking(${index})">ZEITRAUM BUCHEN</button>
-                    </div>
+                    <button class="btn-save-date" onclick="updateBooking(${index})">ZEITRAUM SPEICHERN</button>
                 `;
                 listDiv.appendChild(card);
             });
@@ -129,7 +99,7 @@
             const name = document.getElementById('itemName').value;
             const amount = document.getElementById('itemAmount').value;
             if(name.trim() !== "") {
-                inventory.push({ name: name, amount: amount, start: null, end: null });
+                inventory.push({ name, amount, start: null, end: null });
                 save();
                 document.getElementById('itemName').value = "";
                 render();
@@ -137,24 +107,22 @@
         }
 
         function updateBooking(index) {
-            const start = document.getElementById(`start-${index}`).value;
-            const end = document.getElementById(`end-${index}`).value;
-            inventory[index].start = start || null;
-            inventory[index].end = end || null;
+            const s = document.getElementById(`start-${index}`).value;
+            const e = document.getElementById(`end-${index}`).value;
+            inventory[index].start = s || null;
+            inventory[index].end = e || null;
             save();
             render();
         }
 
         function deleteItem(index) {
-            if(confirm("Gegenstand löschen?")) {
-                inventory.splice(index, 1);
-                save();
-                render();
-            }
+            inventory.splice(index, 1);
+            save();
+            render();
         }
 
         function save() {
-            localStorage.setItem('ev_inventory_vFinal', JSON.stringify(inventory));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
         }
 
         render();
